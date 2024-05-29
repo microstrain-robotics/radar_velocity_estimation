@@ -2,7 +2,7 @@
 
 #include "radar_velocity_estimation_node/RadarVelocityNode.h"
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
 

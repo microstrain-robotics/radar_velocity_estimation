@@ -8,22 +8,22 @@
 
 #include "radar_velocity_estimation/calculate_radar_velocity.h"
 
-
-namespace radar_velocity_estimation_node {
-    RadarVelocityNode::RadarVelocityNode(const std::string& node_name) : rclcpp::Node(node_name)
+namespace radar_velocity_estimation_node
+{
+    RadarVelocityNode::RadarVelocityNode(const std::string &node_name) : rclcpp::Node(node_name)
     {
         // Parameters
         this->declare_parameter("min_point_distance", 3.0);
 
         // Subscribers
-        _point_cloud_subscriber = this->create_subscription<sensor_msgs::msg::PointCloud>(topics::ROS_INPUT_RADAR_TOPIC_NAME, rclcpp::SensorDataQoS(), std::bind(&RadarVelocityNode::handle_input_point_cloud, this, std::placeholders::_1));
+        _point_cloud_subscriber = this->create_subscription<sensor_msgs::msg::PointCloud2>(topics::ROS_INPUT_RADAR_TOPIC_NAME, 10, std::bind(&RadarVelocityNode::handle_input_point_cloud, this, std::placeholders::_1));
 
         // Publishers
         _radar_velocity_publisher = this->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(topics::ROS_OUTPUT_RADAR_VELOCITY_TOPIC_NAME, 10);
         _radar_velocity_viz_publisher = this->create_publisher<geometry_msgs::msg::TwistStamped>(topics::ROS_OUTPUT_RADAR_VELOCITY_VIZ_TOPIC_NAME, 10);
     }
 
-    void RadarVelocityNode::handle_input_point_cloud(sensor_msgs::msg::PointCloud::SharedPtr point_cloud_msg)
+    void RadarVelocityNode::handle_input_point_cloud(sensor_msgs::msg::PointCloud2::SharedPtr point_cloud_msg)
     {
         radar_velocity_estimation::RadarPointCloud radar_point_cloud = convert_from_ros_message(*point_cloud_msg);
 
@@ -38,7 +38,7 @@ namespace radar_velocity_estimation_node {
             RCLCPP_WARN(get_logger(), "Failed to calculate radar velocity estimate");
             return;
         }
-        
+
         geometry_msgs::msg::TwistWithCovarianceStamped output_twist_with_cov_msg;
         output_twist_with_cov_msg.header = point_cloud_msg->header;
 
@@ -46,8 +46,8 @@ namespace radar_velocity_estimation_node {
         output_twist_with_cov_msg.twist.twist.linear.y = velocity[1];
         output_twist_with_cov_msg.twist.twist.linear.z = velocity[2];
 
-        Eigen::Matrix<double,6,6> covariance = Eigen::Matrix<double,6,6>::Identity() * -1;
-        covariance.block<3,3>(0,0) = velocity_covariance;
+        Eigen::Matrix<double, 6, 6> covariance = Eigen::Matrix<double, 6, 6>::Identity() * -1;
+        covariance.block<3, 3>(0, 0) = velocity_covariance;
 
         output_twist_with_cov_msg.twist.covariance = from_eigen_covariance(covariance);
 
@@ -61,7 +61,7 @@ namespace radar_velocity_estimation_node {
     }
 
     void RadarVelocityNode::reset(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+                                  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
     }
 } // radar_velocity_estimation_node
