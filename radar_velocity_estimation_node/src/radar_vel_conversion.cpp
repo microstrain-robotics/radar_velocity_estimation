@@ -1,3 +1,13 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (c)  2024, Microstrain by HBK
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"

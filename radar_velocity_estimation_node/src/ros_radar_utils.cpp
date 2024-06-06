@@ -1,6 +1,13 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Created by davidrobbins on 11/28/23.
+// Copyright (c)  2024, Microstrain by HBK
 //
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include <optional>
 
 #include "radar_velocity_estimation_node/ros_radar_utils.h"
