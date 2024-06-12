@@ -18,7 +18,7 @@
 namespace radar_velocity_estimation
 {
 
-    double findMedian(std::vector<double> speeds)
+    double find_median(std::vector<double> speeds)
     {
         std::sort(speeds.begin(), speeds.end());
         int length = speeds.size();
@@ -32,7 +32,7 @@ namespace radar_velocity_estimation
         return median;
     }
 
-    RadarPointCloud rejectOutliers(const RadarPointCloud &radar_point_cloud, double range)
+    RadarPointCloud reject_outliers(const RadarPointCloud &radar_point_cloud, double range)
     {
         std::vector<double> speeds;
         for (size_t i = 0; i < radar_point_cloud.speed.size(); i++)
@@ -40,7 +40,7 @@ namespace radar_velocity_estimation
             speeds.push_back(-1 * radar_point_cloud.speed[i]);
         }
 
-        double median = findMedian(speeds);
+        double median = find_median(speeds);
 
         RadarPointCloud radar_point_cloud_rej;
 
@@ -63,20 +63,26 @@ namespace radar_velocity_estimation
         Eigen::Matrix3d velocity_covariance = Eigen::Matrix3d::Zero();
         bool solution_valid = false;
 
+        // Minimum number of points required for velocity vector to be observable
+        // Just return if minimum threshold is not met
         if (radar_point_cloud.points.size() < radar_velocity_settings.min_point_cloud_size)
         {
             return {solution_valid, velocity_estimate, velocity_covariance};
         }
 
-        RadarPointCloud radar_point_cloud_rej = rejectOutliers(radar_point_cloud, radar_velocity_settings.inlier_range_from_median);
+        //  Remove explicit outlier from point cloud
+        RadarPointCloud radar_point_cloud_rej = reject_outliers(radar_point_cloud, radar_velocity_settings.inlier_range_from_median);
 
-        std::vector<gtsam::noiseModel::Robust::shared_ptr> robust_radial_velocity_noise_models;
         auto radial_velocity_noise_model = gtsam::noiseModel::Isotropic::Sigma(1, .25);
+
+        // Robust models are applied "sequentially", each step with more agressive outlier rejection model
+        // This allows for good initial convergence while still virtually eliminating large outliers
+        std::vector<gtsam::noiseModel::Robust::shared_ptr> robust_radial_velocity_noise_models;
         robust_radial_velocity_noise_models.push_back(gtsam::noiseModel::Robust::Create(gtsam::noiseModel::mEstimator::Cauchy::Create(3), radial_velocity_noise_model));
         robust_radial_velocity_noise_models.push_back(gtsam::noiseModel::Robust::Create(gtsam::noiseModel::mEstimator::Welsch::Create(3), radial_velocity_noise_model));
 
         gtsam::Key velocity_key = 0;
-        double median = findMedian(radar_point_cloud_rej.speed);
+        double median = find_median(radar_point_cloud_rej.speed);
         velocity_estimate = {median, 0, 0};
 
         for (size_t model = 0; model < robust_radial_velocity_noise_models.size(); model++)
@@ -85,6 +91,7 @@ namespace radar_velocity_estimation
             gtsam::Values states;
             states.insert(velocity_key, velocity_estimate);
 
+            // Build factor graph
             for (size_t i = 0; i < radar_point_cloud_rej.points.size(); i++)
             {
                 // Check minimum distance threshold
@@ -97,11 +104,13 @@ namespace radar_velocity_estimation
                 factors.add(radar_factor);
             }
 
+            // Don't attempt to solve if no factors are created
             if (factors.size() == 0)
             {
                 return {solution_valid, velocity_estimate, velocity_covariance};
             }
 
+            // Solve
             try
             {
                 gtsam::LevenbergMarquardtOptimizer optimizer(factors, states);
@@ -109,6 +118,7 @@ namespace radar_velocity_estimation
 
                 velocity_estimate = solution.at<gtsam::Vector3>(velocity_key);
 
+                // Only calculate covariance on the final step
                 if (model == (robust_radial_velocity_noise_models.size() - 1))
                 {
                     gtsam::Marginals marginals(factors, solution);
@@ -121,6 +131,7 @@ namespace radar_velocity_estimation
             }
         }
 
+        // Scale covariance to appropriate value (determined experimentally)
         double target_x_covariance = pow(.15, 2);
         double covariance_scaling = target_x_covariance / velocity_covariance(0, 0);
         velocity_covariance *= covariance_scaling;

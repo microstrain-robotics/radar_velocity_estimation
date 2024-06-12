@@ -37,6 +37,7 @@ namespace radar_velocity_estimation_node
         radar_velocity_estimation::RadarVelocitySettings radar_velocity_settings;
         radar_velocity_settings.min_distance = get_min_point_distance();
 
+        // Estimate velocity and covariance
         auto [solution_valid, velocity, velocity_covariance] = radar_velocity_estimation::caluclate_radar_velocity_with_covariance(radar_point_cloud, radar_velocity_settings);
 
         if (!solution_valid)
@@ -45,6 +46,7 @@ namespace radar_velocity_estimation_node
             return;
         }
 
+        // Populate message
         geometry_msgs::msg::TwistWithCovarianceStamped output_twist_with_cov_msg;
         output_twist_with_cov_msg.header = point_cloud_msg->header;
 
@@ -64,10 +66,5 @@ namespace radar_velocity_estimation_node
         output_twist_msg.twist = output_twist_with_cov_msg.twist.twist;
 
         _radar_velocity_viz_publisher->publish(output_twist_msg);
-    }
-
-    void RadarVelocityNode::reset(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                                  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
-    {
     }
 } // radar_velocity_estimation_node

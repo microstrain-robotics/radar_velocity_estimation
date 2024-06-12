@@ -1,6 +1,8 @@
 ## Description
 ROS2 node to process point cloud data from a radar system and calculate the corresponding body frame velocity. This process involves performing non-linear optimization using the point cloud data as inputs. To ensure accuracy, outliers are managed through the application of robust error models.
 
+The node has been tested with the Smartmicro DRVEGRD 152 Front Radar and was designed for integration with the MicroStrain CV7-INS, but can applied for general use.
+
 ## Building from Source
 1. Install [ROS2](https://docs.ros.org/en/humble/Installation.html) and [Create a Workspace](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html)
 2. Clone the Repository into your workspace:
@@ -24,11 +26,12 @@ ROS2 node to process point cloud data from a radar system and calculate the corr
 ```
 ros2 run radar_velocity_estimation_node radar_velocity_estimation_node
 ```
-The Node was made for the Smartmicro DRVEGRD 152 Front Radar and the CV7_INS,
-  * It Subscribes to `/smart_radar/targets_0` containing `sensor_msgs::msg::PointCloud2` messages
-  * It Publishes `geometry_msgs::msg::TwistWithCovarianceStamped` to `/cv7_ins/ext/velocity_body`
-
-The Topics subscribed/published to can be changed by modifying the file: `/radar_velocity_estimation_node/include/radar_velocity_estimation_node/topics.h`
+## ROS Interfaces
+| Topic                        | Type                                     | Description                                                                   |
+|------------------------------|------------------------------------------|-------------------------------------------------------------------------------|
+| `/smart_radar/targets_0`     | sensor_msgs/PointCloud2                  | Input 4D radar point cloud with speed                                         |
+| `/cv7_ins/ext/velocity_body` | geometry_msgs/TwistWithCovarianceStamped | Output estimated bodyframe velocity with covariance                           |
+| `/radar_velocity_viz`        | geometry_msgs/TwistStamped               | Output estimated bodyframe velocity, primarily used for visualization in RViz |
 
 ## License
 MIT License
