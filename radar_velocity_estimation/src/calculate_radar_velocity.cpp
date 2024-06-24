@@ -63,15 +63,15 @@ namespace radar_velocity_estimation
         Eigen::Matrix3d velocity_covariance = Eigen::Matrix3d::Zero();
         bool solution_valid = false;
 
+        //  Remove explicit outlier from point cloud
+        RadarPointCloud radar_point_cloud_rej = reject_outliers(radar_point_cloud, radar_velocity_settings.inlier_range_from_median);
+
         // Minimum number of points required for velocity vector to be observable
         // Just return if minimum threshold is not met
         if (radar_point_cloud.points.size() < radar_velocity_settings.min_point_cloud_size)
         {
             return {solution_valid, velocity_estimate, velocity_covariance};
         }
-
-        //  Remove explicit outlier from point cloud
-        RadarPointCloud radar_point_cloud_rej = reject_outliers(radar_point_cloud, radar_velocity_settings.inlier_range_from_median);
 
         auto radial_velocity_noise_model = gtsam::noiseModel::Isotropic::Sigma(1, .25);
 
