@@ -15,17 +15,13 @@ The node has been tested with the Smartmicro DRVEGRD 152 Front Radar and was des
    cd ~/your_workspace
    colcon build
    ```
-5. Source ROS2 and the Workspace
-   ```
-   source /opt/ros/humble/setup.bash
-   source /your_workspace/install/setup.bash
-   ```
-   The source commands need to be run on every terminal before launching the node or these lines can just be added to the .bashrc
-
+   
 ## Running the node
 ```
+source /your_workspace/install/setup.bash
 ros2 run radar_velocity_estimation_node radar_velocity_estimation_node
 ```
+
 ## ROS Interfaces
 | Topic                        | Type                                     | Description                                                                   |
 |------------------------------|------------------------------------------|-------------------------------------------------------------------------------|
