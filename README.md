@@ -25,7 +25,7 @@ ros2 run radar_velocity_estimation_node radar_velocity_estimation_node
 ## ROS Interfaces
 | Topic                        | Type                                     | Description                                                                   |
 |------------------------------|------------------------------------------|-------------------------------------------------------------------------------|
-| `/smart_radar/targets_0`     | sensor_msgs/PointCloud2                  | Input 4D radar point cloud with speed                                         |
+| `/smart_radar/can_targets_0`     | sensor_msgs/PointCloud2                  | Input 4D radar point cloud with speed                                         |
 | `/cv7_ins/ext/velocity_body` | geometry_msgs/TwistWithCovarianceStamped | Output estimated bodyframe velocity with covariance                           |
 | `/radar_velocity_viz`        | geometry_msgs/TwistStamped               | Output estimated bodyframe velocity, primarily used for visualization in RViz |
 
